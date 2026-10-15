@@ -1,0 +1,109 @@
+$app-background: #f3f4f6;
+$app-surface: #ffffff;
+$app-text: #1f2937;
+$app-muted: #6b7280;
+$app-border: #e5e7eb;
+$app-accent: #2563eb;
+$app-spacing: 1.5rem;
+$app-radius: 0.75rem;
+$sidebar-width: 16rem;
+
+.app {
+  display: grid;
+  grid-template-columns: $sidebar-width minmax(0, 1fr);
+  min-height: 100vh;
+  max-width: 100%;
+  overflow-x: hidden;
+  background-color: $app-background;
+  color: $app-text;
+
+  > .sidebar {
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  &__main {
+    min-width: 0;
+  }
+
+  &__content {
+    display: grid;
+    gap: $app-spacing;
+    max-width: 100%;
+    padding: $app-spacing;
+  }
+}
+
+.welcome {
+  padding: $app-spacing;
+  border: 1px solid $app-border;
+  border-radius: $app-radius;
+  background-color: $app-surface;
+
+  &__title {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+  }
+
+  &__description {
+    margin: 0;
+    color: $app-muted;
+    line-height: 1.5;
+  }
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $app-spacing;
+
+  &__card {
+    min-width: 0;
+    padding: $app-spacing;
+    border: 1px solid $app-border;
+    border-radius: $app-radius;
+    background-color: $app-surface;
+  }
+
+  &__title {
+    margin: 0 0 0.75rem;
+    color: $app-muted;
+    font-size: 0.95rem;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+
+  &__value {
+    margin: 0;
+    color: $app-accent;
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 800px) {
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+
+    > .sidebar {
+      min-height: auto;
+    }
+  }
+
+  .summary {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .app {
+    &__content {
+      padding: 1rem;
+    }
+  }
+
+  .welcome,
+  .summary__card {
+    padding: 1rem;
+  }
+}

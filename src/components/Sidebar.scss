@@ -1,0 +1,64 @@
+$sidebar-background: #111827;
+$sidebar-text: #e5e7eb;
+$sidebar-muted: #9ca3af;
+$sidebar-active: #2563eb;
+$sidebar-active-text: #ffffff;
+$sidebar-spacing: 1rem;
+
+.sidebar {
+  box-sizing: border-box;
+  width: clamp(14rem, 22vw, 18rem);
+  max-width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  padding: $sidebar-spacing;
+  overflow-x: hidden;
+  background-color: $sidebar-background;
+  color: $sidebar-text;
+
+  &__title {
+    margin: 0 0 ($sidebar-spacing * 2);
+    color: $sidebar-active-text;
+    font-size: 1.35rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__link {
+    display: block;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    color: $sidebar-muted;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+
+    &:hover,
+    &:focus-visible {
+      color: $sidebar-text;
+      background-color: rgba(255, 255, 255, 0.08);
+      outline: none;
+    }
+
+    &[aria-current="page"] {
+      color: $sidebar-active-text;
+      background-color: $sidebar-active;
+      font-weight: 600;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+  }
+}
