@@ -79,6 +79,51 @@ $sidebar-width: 16rem;
     font-size: 1.75rem;
     font-weight: 700;
   }
+
+  &__note {
+    margin: 0.75rem 0 0;
+    color: $app-muted;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  &__error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem $app-spacing;
+    border: 1px solid #fecaca;
+    border-radius: $app-radius;
+    background-color: $app-surface;
+    color: #b91c1c;
+
+    p {
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+
+  &__retry {
+    flex: 0 0 auto;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid $app-accent;
+    border-radius: 0.5rem;
+    background-color: $app-surface;
+    color: $app-accent;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #eff6ff;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $app-accent;
+      outline-offset: 2px;
+    }
+  }
 }
 
 @media (max-width: 800px) {
@@ -104,6 +149,12 @@ $sidebar-width: 16rem;
 
   .welcome,
   .summary__card {
+    padding: 1rem;
+  }
+
+  .summary__error {
+    align-items: flex-start;
+    flex-direction: column;
     padding: 1rem;
   }
 }

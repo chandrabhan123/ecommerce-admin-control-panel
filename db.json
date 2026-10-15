@@ -22,5 +22,105 @@
       "stock": 40
     }
   ],
+  "orders": [
+    {
+      "id": "ORD-1001",
+      "customer": "Ananya Sharma",
+      "date": "2026-10-12",
+      "total": 5499,
+      "status": "Delivered"
+    },
+    {
+      "id": "ORD-1002",
+      "customer": "Rohan Mehta",
+      "date": "2026-10-13",
+      "total": 1299,
+      "status": "Pending"
+    },
+    {
+      "id": "ORD-1003",
+      "customer": "Priya Nair",
+      "date": "2026-10-13",
+      "total": 24999,
+      "status": "Processing"
+    },
+    {
+      "id": "ORD-1004",
+      "customer": "Arjun Kapoor",
+      "date": "2026-10-14",
+      "total": 3200,
+      "status": "Shipped"
+    },
+    {
+      "id": "ORD-1005",
+      "customer": "Meera Iyer",
+      "date": "2026-10-14",
+      "total": 8750,
+      "status": "Delivered"
+    },
+    {
+      "id": "ORD-1006",
+      "customer": "Kabir Singh",
+      "date": "2026-10-15",
+      "total": 1999,
+      "status": "Pending"
+    },
+    {
+      "id": "ORD-1007",
+      "customer": "Sana Khan",
+      "date": "2026-10-15",
+      "total": 14500,
+      "status": "Processing"
+    }
+  ],
+  "customers": [
+    {
+      "id": "CUS-2001",
+      "name": "Ananya Sharma",
+      "email": "ananya.sharma@example.com",
+      "phone": "+91 98765 43210",
+      "registrationDate": "2025-04-18"
+    },
+    {
+      "id": "CUS-2002",
+      "name": "Rohan Mehta",
+      "email": "rohan.mehta@example.com",
+      "phone": "+91 98123 45670",
+      "registrationDate": "2025-07-02"
+    },
+    {
+      "id": "CUS-2003",
+      "name": "Priya Nair",
+      "email": "priya.nair@example.com",
+      "phone": "+91 99887 76655",
+      "registrationDate": "2025-09-24"
+    },
+    {
+      "id": "CUS-2004",
+      "name": "Arjun Kapoor",
+      "email": "arjun.kapoor@example.com",
+      "phone": "+91 97654 32109",
+      "registrationDate": "2025-11-11"
+    },
+    {
+      "id": "CUS-2005",
+      "name": "Meera Iyer",
+      "email": "meera.iyer@example.com",
+      "registrationDate": "2026-01-05"
+    },
+    {
+      "id": "CUS-2006",
+      "name": "Kabir Singh",
+      "email": "kabir.singh@example.com",
+      "phone": "+91 91234 56780",
+      "registrationDate": "2026-03-16"
+    },
+    {
+      "id": "CUS-2007",
+      "name": "Sana Khan",
+      "email": "sana.khan@example.com",
+      "phone": "+91 93456 78901"
+    }
+  ],
   "$schema": "./node_modules/json-server/schema.json"
 }

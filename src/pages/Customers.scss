@@ -1,0 +1,229 @@
+$customers-surface: #ffffff;
+$customers-text: #1f2937;
+$customers-muted: #6b7280;
+$customers-border: #e5e7eb;
+$customers-accent: #2563eb;
+$customers-error: #b91c1c;
+$customers-radius: 0.75rem;
+$customers-spacing: 1.5rem;
+
+.customers {
+  display: grid;
+  gap: $customers-spacing;
+  min-width: 0;
+
+  &__intro,
+  &__controls,
+  &__message,
+  &__table-wrapper,
+  &__pagination {
+    padding: $customers-spacing;
+    border: 1px solid $customers-border;
+    border-radius: $customers-radius;
+    background-color: $customers-surface;
+  }
+
+  &__title {
+    margin: 0 0 0.5rem;
+    color: $customers-text;
+    font-size: 1.5rem;
+  }
+
+  &__description {
+    margin: 0;
+    color: $customers-muted;
+    line-height: 1.5;
+  }
+
+  &__controls {
+    display: grid;
+    grid-template-columns: minmax(12rem, 1fr);
+    gap: 1rem;
+  }
+
+  &__control {
+    display: grid;
+    align-content: start;
+    gap: 0.45rem;
+    min-width: 0;
+  }
+
+  &__label,
+  &__page-size-label {
+    color: $customers-muted;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  &__input,
+  &__select {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid $customers-border;
+    border-radius: 0.5rem;
+    background-color: $customers-surface;
+    color: $customers-text;
+    font: inherit;
+
+    &:focus-visible {
+      border-color: $customers-accent;
+      outline: 2px solid $customers-accent;
+      outline-offset: 2px;
+    }
+  }
+
+  &__message {
+    margin: 0;
+    color: $customers-muted;
+    line-height: 1.5;
+
+    &--error {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      border-color: #fecaca;
+      color: $customers-error;
+
+      p {
+        margin: 0;
+      }
+    }
+  }
+
+  &__retry,
+  &__page-button {
+    padding: 0.65rem 0.85rem;
+    border: 1px solid $customers-border;
+    border-radius: 0.5rem;
+    background-color: $customers-surface;
+    color: $customers-text;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      border-color: $customers-accent;
+      color: $customers-accent;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $customers-accent;
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      color: $customers-muted;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  &__retry {
+    flex: 0 0 auto;
+  }
+
+  &__table-wrapper {
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    color: $customers-text;
+    text-align: left;
+
+    th,
+    td {
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid $customers-border;
+      white-space: nowrap;
+    }
+
+    th {
+      color: $customers-muted;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr:hover {
+      background-color: #f9fafb;
+    }
+  }
+
+  &__caption {
+    padding: 0 1rem 0.75rem;
+    color: $customers-muted;
+    font-size: 0.875rem;
+    text-align: left;
+  }
+
+  &__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  &__range {
+    margin: 0;
+    color: $customers-muted;
+    line-height: 1.5;
+  }
+
+  &__pagination-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  &__page-size {
+    width: auto;
+    min-width: 4.5rem;
+  }
+
+  &__page-indicator {
+    color: $customers-text;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .customers {
+    gap: 1rem;
+
+    &__intro,
+    &__controls,
+    &__message,
+    &__table-wrapper,
+    &__pagination {
+      padding: 1rem;
+    }
+
+    &__message--error,
+    &__pagination {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    &__pagination-actions {
+      justify-content: flex-start;
+    }
+
+    &__table {
+      th,
+      td {
+        padding: 0.75rem;
+      }
+    }
+  }
+}

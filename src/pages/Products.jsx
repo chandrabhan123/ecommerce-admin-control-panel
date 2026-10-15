@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { fetchProducts, removeProduct } from "../features/products/productsSlice";
 import "./Products.scss";
-
-const PRODUCTS_URL = "http://localhost:3000/products";
 
 const priceFormatter = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -18,9 +18,11 @@ const sortOptions = [
 ];
 
 function Products() {
-  const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
+  const dispatch = useDispatch();
+  const { items: products, status, error } = useSelector(
+    (state) => state.products,
+  );
+  const isLoading = status === "loading";
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSort, setSelectedSort] = useState("name-asc");
@@ -31,45 +33,9 @@ function Products() {
   const [deleteSuccess, setDeleteSuccess] = useState("");
 
   useEffect(() => {
-    let isCurrent = true;
-
-    async function loadProducts() {
-      try {
-        const response = await fetch(PRODUCTS_URL);
-
-        if (!response.ok) {
-          throw new Error(`The server responded with status ${response.status}.`);
-        }
-
-        const data = await response.json();
-
-        if (!Array.isArray(data)) {
-          throw new Error("The product data was not in the expected format.");
-        }
-
-        if (isCurrent) {
-          setProducts(data);
-          setError("");
-        }
-      } catch (requestError) {
-        if (isCurrent) {
-          setError(
-            `We couldn't load the products. ${requestError.message} Please check that the product service is running and try again.`,
-          );
-        }
-      } finally {
-        if (isCurrent) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadProducts();
-
-    return () => {
-      isCurrent = false;
-    };
-  }, []);
+    // Redux owns this request, so it can safely finish if this page unmounts.
+    dispatch(fetchProducts({ force: true }));
+  }, [dispatch]);
 
   function handleSearchChange(event) {
     setSearchTerm(event.target.value);
@@ -89,6 +55,10 @@ function Products() {
   function handlePageSizeChange(event) {
     setPageSize(Number(event.target.value));
     setCurrentPage(1);
+  }
+
+  function handleRetry() {
+    dispatch(fetchProducts({ force: true }));
   }
 
   async function handleDeleteProduct(product) {
@@ -113,9 +83,7 @@ function Products() {
         throw new Error(`The server responded with status ${response.status}.`);
       }
 
-      setProducts((currentProducts) =>
-        currentProducts.filter((currentProduct) => currentProduct.id !== product.id),
-      );
+      dispatch(removeProduct(product.id));
       setDeleteSuccess(`${product.name} was deleted successfully.`);
     } catch (requestError) {
       setDeleteError(
@@ -206,9 +174,12 @@ function Products() {
       )}
 
       {!isLoading && error && (
-        <p className="products__message products__message--error" role="alert">
-          {error}
-        </p>
+        <div className="products__message products__message--error" role="alert">
+          <p>{error}</p>
+          <button className="products__retry" type="button" onClick={handleRetry}>
+            Try again
+          </button>
+        </div>
       )}
 
       {!isLoading && !error && products.length === 0 && (

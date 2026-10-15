@@ -82,8 +82,16 @@ $products-spacing: 1.5rem;
     line-height: 1.5;
 
     &--error {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
       border-color: #fecaca;
       color: $products-error;
+
+      p {
+        margin: 0;
+      }
     }
 
     &--success {
@@ -212,6 +220,27 @@ $products-spacing: 1.5rem;
     }
   }
 
+  &__retry {
+    flex: 0 0 auto;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid $products-border;
+    border-radius: 0.5rem;
+    background-color: $products-surface;
+    color: $products-text;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+      border-color: $products-accent;
+      color: $products-accent;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $products-accent;
+      outline-offset: 2px;
+    }
+  }
+
   &__table {
     width: 100%;
     border-collapse: collapse;
@@ -270,6 +299,11 @@ $products-spacing: 1.5rem;
     }
 
     &__pagination {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    &__message--error {
       align-items: stretch;
       flex-direction: column;
     }
