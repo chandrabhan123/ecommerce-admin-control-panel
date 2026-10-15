@@ -1,8 +1,10 @@
 import "./Sidebar.scss";
+import { NavLink } from "react-router-dom";
 
 const navigationItems = [
-  { label: "Dashboard", href: "/dashboard" },
+  { label: "Dashboard", href: "/" },
   { label: "Products", href: "/products" },
+  { label: "Add Product", href: "/products/add" },
   { label: "Orders", href: "/orders" },
   { label: "Customers", href: "/customers" },
 ];
@@ -16,13 +18,13 @@ function Sidebar() {
         <ul className="sidebar__list">
           {navigationItems.map((item) => (
             <li className="sidebar__item" key={item.href}>
-              <a
+              <NavLink
                 className="sidebar__link"
-                href={item.href}
-                aria-current={item.label === "Dashboard" ? "page" : undefined}
+                to={item.href}
+                end={item.href === "/" || item.href === "/products"}
               >
                 {item.label}
-              </a>
+              </NavLink>
             </li>
           ))}
         </ul>

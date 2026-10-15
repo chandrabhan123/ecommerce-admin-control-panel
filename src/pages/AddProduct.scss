@@ -1,0 +1,124 @@
+$add-product-surface: #ffffff;
+$add-product-text: #1f2937;
+$add-product-muted: #6b7280;
+$add-product-border: #e5e7eb;
+$add-product-accent: #2563eb;
+$add-product-error: #b91c1c;
+$add-product-success: #15803d;
+$add-product-radius: 0.75rem;
+$add-product-spacing: 1.5rem;
+
+.add-product {
+  display: grid;
+  gap: $add-product-spacing;
+  min-width: 0;
+
+  &__intro,
+  &__form {
+    padding: $add-product-spacing;
+    border: 1px solid $add-product-border;
+    border-radius: $add-product-radius;
+    background-color: $add-product-surface;
+  }
+
+  &__title {
+    margin: 0 0 0.5rem;
+    color: $add-product-text;
+    font-size: 1.5rem;
+  }
+
+  &__description {
+    margin: 0;
+    color: $add-product-muted;
+    line-height: 1.5;
+  }
+
+  &__form {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 42rem;
+  }
+
+  &__field {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  &__label {
+    color: $add-product-text;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  &__input {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid $add-product-border;
+    border-radius: 0.5rem;
+    background-color: $add-product-surface;
+    color: $add-product-text;
+    font: inherit;
+
+    &:focus-visible {
+      border-color: $add-product-accent;
+      outline: 2px solid $add-product-accent;
+      outline-offset: 2px;
+    }
+  }
+
+  &__message {
+    margin: 0;
+    line-height: 1.5;
+
+    &--error {
+      color: $add-product-error;
+    }
+
+    &--success {
+      color: $add-product-success;
+    }
+  }
+
+  &__submit {
+    justify-self: start;
+    padding: 0.75rem 1.1rem;
+    border: 1px solid $add-product-accent;
+    border-radius: 0.5rem;
+    background-color: $add-product-accent;
+    color: $add-product-surface;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background-color: #1d4ed8;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $add-product-accent;
+      outline-offset: 3px;
+    }
+
+    &:disabled {
+      cursor: wait;
+      opacity: 0.7;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .add-product {
+    gap: 1rem;
+
+    &__intro,
+    &__form {
+      padding: 1rem;
+    }
+
+    &__submit {
+      width: 100%;
+    }
+  }
+}
