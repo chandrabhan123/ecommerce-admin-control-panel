@@ -121,6 +121,5 @@
       "email": "sana.khan@example.com",
       "phone": "+91 93456 78901"
     }
-  ],
-  "$schema": "./node_modules/json-server/schema.json"
+  ]
 }
