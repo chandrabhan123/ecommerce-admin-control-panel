@@ -12,7 +12,13 @@ const navigationItems = [
 function Sidebar() {
   return (
     <aside className="sidebar" aria-label="Admin sidebar">
-      <h2 className="sidebar__title">Admin Panel</h2>
+      <div className="sidebar__brand">
+        <span className="sidebar__brand-mark" aria-hidden="true">S</span>
+        <div>
+          <h2 className="sidebar__title">Storefront</h2>
+          <p className="sidebar__subtitle">Control panel</p>
+        </div>
+      </div>
 
       <nav className="sidebar__nav" aria-label="Main navigation">
         <ul className="sidebar__list">

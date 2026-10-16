@@ -1,3 +1,30 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #172033;
+  background: #f4f6fb;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  color-scheme: light;
+
+  /* Shared design tokens used by the page and component SCSS files. */
+  --color-page: #f4f6fb;
+  --color-surface: #ffffff;
+  --color-text: #172033;
+  --color-muted: #566174;
+  --color-border: #dfe5ef;
+  --color-accent: #3659d9;
+  --color-accent-hover: #2948bd;
+  --color-accent-soft: #edf2ff;
+  --color-error: #a52222;
+  --color-error-soft: #fff4f3;
+  --color-success: #18794e;
+  --color-success-soft: #effaf4;
+  --radius-card: 0.9rem;
+  --radius-control: 0.6rem;
+  --shadow-card: 0 8px 24px rgba(24, 39, 75, 0.045);
+  --shadow-card-hover: 0 14px 30px rgba(24, 39, 75, 0.09);
+  --transition-ui: 160ms ease;
+}
 
 * {
   margin: 0;
@@ -5,10 +32,18 @@
   box-sizing: border-box;
 }
 
+html {
+  min-width: 320px;
+  min-height: 100%;
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f5f6fa;
-  color: #222;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--color-page);
+  color: var(--color-text);
+  line-height: 1.5;
 }
 
 button,
@@ -16,4 +51,39 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  transition: color var(--transition-ui), background-color var(--transition-ui),
+    border-color var(--transition-ui), box-shadow var(--transition-ui),
+    transform var(--transition-ui);
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+::selection {
+  background: #dce5ff;
+  color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

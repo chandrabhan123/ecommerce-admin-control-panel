@@ -1,11 +1,11 @@
-$add-product-surface: #ffffff;
-$add-product-text: #1f2937;
-$add-product-muted: #6b7280;
-$add-product-border: #e5e7eb;
-$add-product-accent: #2563eb;
-$add-product-error: #b91c1c;
-$add-product-success: #15803d;
-$add-product-radius: 0.75rem;
+$add-product-surface: var(--color-surface);
+$add-product-text: var(--color-text);
+$add-product-muted: var(--color-muted);
+$add-product-border: var(--color-border);
+$add-product-accent: var(--color-accent);
+$add-product-error: var(--color-error);
+$add-product-success: var(--color-success);
+$add-product-radius: var(--radius-card);
 $add-product-spacing: 1.5rem;
 
 .add-product {
@@ -73,11 +73,19 @@ $add-product-spacing: 1.5rem;
     line-height: 1.5;
 
     &--error {
+      padding: 0.75rem 0.9rem;
+      border: 1px solid #f2ceca;
+      border-radius: var(--radius-control);
       color: $add-product-error;
+      background-color: var(--color-error-soft);
     }
 
     &--success {
+      padding: 0.75rem 0.9rem;
+      border: 1px solid #b6e5cb;
+      border-radius: var(--radius-control);
       color: $add-product-success;
+      background-color: var(--color-success-soft);
     }
   }
 
@@ -93,7 +101,7 @@ $add-product-spacing: 1.5rem;
     cursor: pointer;
 
     &:hover:not(:disabled) {
-      background-color: #1d4ed8;
+      background-color: var(--color-accent-hover);
     }
 
     &:focus-visible {

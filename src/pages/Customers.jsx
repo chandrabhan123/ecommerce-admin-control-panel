@@ -1,87 +1,127 @@
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchDashboardUsers } from "../features/dashboard/dashboardSlice";
 import "./Customers.scss";
 
-const CUSTOMERS_URL = "http://localhost:3000/customers";
+const sortOptions = [
+  { value: "name-asc", label: "Name: A to Z" },
+  { value: "name-desc", label: "Name: Z to A" },
+];
 
-const dateFormatter = new Intl.DateTimeFormat("en-IN", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-  timeZone: "UTC",
-});
+function getCustomerName(customer) {
+  return [customer.firstName, customer.lastName]
+    .filter((part) => typeof part === "string" && part.trim())
+    .join(" ");
+}
 
-function formatRegistrationDate(value) {
-  if (!value) {
-    return "Not provided";
+function getCustomerAddress(address) {
+  if (!address || typeof address !== "object") return "Address not provided";
+
+  const parts = [
+    address.address,
+    address.city,
+    address.state,
+    address.postalCode,
+    address.country,
+  ].filter((part) => typeof part === "string" && part.trim());
+
+  return parts.length > 0 ? parts.join(", ") : "Address not provided";
+}
+
+function getInitials(customer) {
+  const initials = [customer.firstName, customer.lastName]
+    .filter((part) => typeof part === "string" && part.trim())
+    .map((part) => part.trim().charAt(0));
+
+  return initials.join("").toUpperCase() || "?";
+}
+
+function CustomerAvatar({ customer }) {
+  const [hasImageError, setHasImageError] = useState(false);
+
+  if (!customer.image || hasImageError) {
+    return (
+      <span className="customers__avatar customers__avatar--fallback" role="img" aria-label={`Avatar unavailable for ${getCustomerName(customer) || "customer"}`}>
+        {getInitials(customer)}
+      </span>
+    );
   }
 
-  const date = new Date(value);
+  return (
+    <img
+      className="customers__avatar"
+      src={customer.image}
+      alt=""
+      loading="lazy"
+      onError={() => setHasImageError(true)}
+    />
+  );
+}
 
-  if (Number.isNaN(date.getTime())) {
-    return "Not provided";
-  }
-
-  return dateFormatter.format(date);
+function CustomerSkeleton() {
+  return (
+    <div className="customers__table-wrapper" aria-label="Loading customer profiles">
+      <table className="customers__table">
+        <caption className="customers__caption">Loading customer profiles</caption>
+        <thead>
+          <tr>
+            <th scope="col">Avatar</th>
+            <th scope="col">Customer</th>
+            <th scope="col">Email</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Gender</th>
+            <th scope="col">Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: 5 }, (_, index) => (
+            <tr key={index}>
+              {Array.from({ length: 6 }, (_, cellIndex) => (
+                <td key={cellIndex}>
+                  <span className="customers__skeleton" />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 function Customers() {
-  const [customers, setCustomers] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [retryCount, setRetryCount] = useState(0);
+  const dispatch = useDispatch();
+  const { users: customers, usersTotal, usersStatus, usersError } = useSelector(
+    (state) => state.dashboard,
+  );
+  const isLoading = usersStatus === "loading";
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedGender, setSelectedGender] = useState("");
+  const [selectedSort, setSelectedSort] = useState("name-asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    let isCurrent = true;
-
-    async function loadCustomers() {
-      try {
-        const response = await fetch(CUSTOMERS_URL);
-
-        if (!response.ok) {
-          throw new Error(`The server responded with status ${response.status}.`);
-        }
-
-        const data = await response.json();
-
-        if (!Array.isArray(data)) {
-          throw new Error("The customer data was not in the expected format.");
-        }
-
-        if (isCurrent) {
-          setCustomers(data);
-          setError("");
-        }
-      } catch (requestError) {
-        if (isCurrent) {
-          setError(
-            `Customers could not be loaded. ${requestError.message} Please check that JSON Server is running and try again.`,
-          );
-        }
-      } finally {
-        if (isCurrent) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadCustomers();
-
-    return () => {
-      isCurrent = false;
-    };
-  }, [retryCount]);
+    // Dashboard and Customers share this thunk and cached users in Redux.
+    dispatch(fetchDashboardUsers());
+  }, [dispatch]);
 
   function handleRetry() {
-    setError("");
-    setIsLoading(true);
-    setRetryCount((count) => count + 1);
+    dispatch(fetchDashboardUsers({ force: true }));
   }
 
   function handleSearchChange(event) {
     setSearchTerm(event.target.value);
+    setCurrentPage(1);
+  }
+
+  function handleGenderChange(event) {
+    setSelectedGender(event.target.value);
+    setCurrentPage(1);
+  }
+
+  function handleSortChange(event) {
+    setSelectedSort(event.target.value);
     setCurrentPage(1);
   }
 
@@ -90,13 +130,35 @@ function Customers() {
     setCurrentPage(1);
   }
 
+  const genders = [...new Set(
+    customers
+      .map((customer) => customer.gender)
+      .filter((gender) => typeof gender === "string" && gender.trim()),
+  )].sort((first, second) => first.localeCompare(second));
   const searchValue = searchTerm.trim().toLowerCase();
-  const filteredCustomers = customers.filter((customer) => {
-    const name = (customer.name || "").toLowerCase();
-    const email = (customer.email || "").toLowerCase();
 
-    return name.includes(searchValue) || email.includes(searchValue);
-  });
+  const filteredCustomers = customers
+    .filter((customer) => {
+      const firstName = typeof customer.firstName === "string" ? customer.firstName : "";
+      const lastName = typeof customer.lastName === "string" ? customer.lastName : "";
+      const fullName = getCustomerName(customer);
+      const email = typeof customer.email === "string" ? customer.email : "";
+      const matchesSearch = [firstName, lastName, fullName, email]
+        .some((value) => value.toLowerCase().includes(searchValue));
+      const matchesGender = !selectedGender || customer.gender === selectedGender;
+
+      return matchesSearch && matchesGender;
+    })
+    .slice()
+    .sort((first, second) => {
+      const firstName = getCustomerName(first);
+      const secondName = getCustomerName(second);
+      const result = firstName.localeCompare(secondName, undefined, {
+        sensitivity: "base",
+      });
+
+      return selectedSort === "name-desc" ? -result : result;
+    });
 
   const totalPages = Math.ceil(filteredCustomers.length / pageSize);
   const displayedPage = totalPages === 0 ? 1 : Math.min(currentPage, totalPages);
@@ -105,52 +167,58 @@ function Customers() {
     firstCustomerIndex,
     firstCustomerIndex + pageSize,
   );
-  const firstCustomerNumber =
-    filteredCustomers.length === 0 ? 0 : firstCustomerIndex + 1;
+  const firstCustomerNumber = filteredCustomers.length === 0 ? 0 : firstCustomerIndex + 1;
   const lastCustomerNumber = Math.min(
     firstCustomerIndex + pageSize,
     filteredCustomers.length,
   );
-
-  useEffect(() => {
-    if (totalPages === 0 && currentPage !== 1) {
-      setCurrentPage(1);
-    } else if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
 
   return (
     <section className="customers" aria-labelledby="customers-title">
       <header className="customers__intro">
         <h2 className="customers__title" id="customers-title">Customers</h2>
         <p className="customers__description">
-          Browse customer contact details and registration dates.
+          Browse DummyJSON user profiles. Customer spending and order counts are not available here.
         </p>
+        {usersTotal != null && (
+          <p className="customers__dataset-note">
+            {customers.length} profiles loaded from {usersTotal} users reported by the API.
+          </p>
+        )}
       </header>
 
-      {isLoading && (
-        <p className="customers__message" role="status">
-          Loading customers...
-        </p>
-      )}
-
-      {!isLoading && error && (
+      {usersError && (
         <div className="customers__message customers__message--error" role="alert">
-          <p>{error}</p>
-          <button className="customers__retry" type="button" onClick={handleRetry}>
+          <p>Customers could not be loaded. {usersError}</p>
+          <button
+            className="customers__retry"
+            type="button"
+            onClick={handleRetry}
+            disabled={isLoading}
+          >
             Try again
           </button>
         </div>
       )}
 
-      {!isLoading && !error && customers.length === 0 && (
-        <p className="customers__message">No customers found.</p>
+      {isLoading && customers.length === 0 && (
+        <div role="status" aria-live="polite">
+          <span className="customers__loading-label">Loading customers...</span>
+          <CustomerSkeleton />
+        </div>
       )}
 
-      {!isLoading && !error && customers.length > 0 && (
+      {isLoading && customers.length > 0 && (
+        <p className="customers__message" role="status">Refreshing customer profiles...</p>
+      )}
+
+      {usersStatus === "succeeded" && customers.length === 0 && (
+        <p className="customers__message">No customers were returned by the API.</p>
+      )}
+
+      {customers.length > 0 && (
         <>
-          <div className="customers__controls">
+          <div className="customers__controls" aria-label="Search and filter customers">
             <div className="customers__control">
               <label className="customers__label" htmlFor="customer-search">
                 Search customers
@@ -159,46 +227,91 @@ function Customers() {
                 className="customers__input"
                 id="customer-search"
                 type="search"
-                placeholder="Search by name or email"
+                placeholder="Search first name, last name, full name, or email"
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
             </div>
+
+            <div className="customers__control">
+              <label className="customers__label" htmlFor="customer-gender">
+                Gender
+              </label>
+              <select
+                className="customers__select"
+                id="customer-gender"
+                value={selectedGender}
+                onChange={handleGenderChange}
+              >
+                <option value="">All genders</option>
+                {genders.map((gender) => (
+                  <option value={gender} key={gender}>
+                    {gender.charAt(0).toUpperCase() + gender.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="customers__control">
+              <label className="customers__label" htmlFor="customer-sort">
+                Sort by name
+              </label>
+              <select
+                className="customers__select"
+                id="customer-sort"
+                value={selectedSort}
+                onChange={handleSortChange}
+              >
+                {sortOptions.map((option) => (
+                  <option value={option.value} key={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {filteredCustomers.length === 0 ? (
-            <p className="customers__message">No matching customers found.</p>
+            <p className="customers__message">No customers match your search and filters.</p>
           ) : (
             <>
               <div className="customers__table-wrapper">
                 <table className="customers__table">
-                  <caption className="customers__caption">Store customers</caption>
+                  <caption className="customers__caption">Customer profiles</caption>
                   <thead>
                     <tr>
-                      <th scope="col">Customer ID</th>
-                      <th scope="col">Name</th>
+                      <th scope="col">Avatar</th>
+                      <th scope="col">Customer</th>
                       <th scope="col">Email</th>
                       <th scope="col">Phone</th>
-                      <th scope="col">Registration Date</th>
+                      <th scope="col">Gender</th>
+                      <th scope="col">Address</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {pageCustomers.map((customer) => (
-                      <tr key={customer.id}>
-                        <td>{customer.id}</td>
-                        <td>{customer.name || "Not provided"}</td>
-                        <td>{customer.email || "Not provided"}</td>
-                        <td>{customer.phone || "Not provided"}</td>
-                        <td>{formatRegistrationDate(customer.registrationDate)}</td>
-                      </tr>
-                    ))}
+                    {pageCustomers.map((customer) => {
+                      const fullName = getCustomerName(customer);
+
+                      return (
+                        <tr key={customer.id}>
+                          <td>
+                            <CustomerAvatar customer={customer} />
+                          </td>
+                          <td>{fullName || "Name not provided"}</td>
+                          <td>{customer.email || "Email not provided"}</td>
+                          <td>{customer.phone || "Phone not provided"}</td>
+                          <td>{customer.gender || "Not provided"}</td>
+                          <td className="customers__address">{getCustomerAddress(customer.address)}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
 
               <nav className="customers__pagination" aria-label="Customer pagination">
                 <p className="customers__range" aria-live="polite">
-                  Showing {firstCustomerNumber}{"\u2013"}{lastCustomerNumber} of {filteredCustomers.length} customers
+                  Showing {firstCustomerNumber}{"\u2013"}{lastCustomerNumber} of {filteredCustomers.length} loaded profiles
                 </p>
 
                 <div className="customers__pagination-actions">
@@ -206,7 +319,7 @@ function Customers() {
                     className="customers__page-size-label"
                     htmlFor="customers-page-size"
                   >
-                    Customers per page
+                    Profiles per page
                   </label>
                   <select
                     className="customers__select customers__page-size"

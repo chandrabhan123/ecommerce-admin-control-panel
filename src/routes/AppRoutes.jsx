@@ -5,6 +5,7 @@ import Orders from "../pages/Orders";
 import Customers from "../pages/Customers";
 import AddProduct from "../pages/AddProduct";
 import EditProduct from "../pages/EditProduct";
+import NotFound from "../pages/NotFound";
 
 function AppRoutes() {
   return (
@@ -15,6 +16,7 @@ function AppRoutes() {
       <Route path="/products/:productId/edit" element={<EditProduct />} />
       <Route path="/orders" element={<Orders />} />
       <Route path="/customers" element={<Customers />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

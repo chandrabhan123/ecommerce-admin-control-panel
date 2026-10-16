@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { fetchProducts, removeProduct } from "../features/products/productsSlice";
+import { deleteProduct, fetchProducts } from "../features/products/productsSlice";
+import { formatCategory } from "../features/products/productUtils";
 import "./Products.scss";
 
 const priceFormatter = new Intl.NumberFormat("en-IN", {
@@ -17,11 +18,60 @@ const sortOptions = [
   { value: "price-desc", label: "Price: High to Low" },
 ];
 
+function ProductThumbnail({ product }) {
+  const [hasImageError, setHasImageError] = useState(false);
+
+  if (!product.thumbnail || hasImageError) {
+    return (
+      <span className="products__image-placeholder" role="img" aria-label="Product image unavailable">
+        No image
+      </span>
+    );
+  }
+
+  return (
+    <img
+      className="products__thumbnail"
+      src={product.thumbnail}
+      alt={product.title || "Product"}
+      loading="lazy"
+      onError={() => setHasImageError(true)}
+    />
+  );
+}
+
+function ProductSkeleton() {
+  return (
+    <div className="products__table-wrapper" aria-label="Loading products">
+      <table className="products__table">
+        <caption className="products__caption">Loading product catalog</caption>
+        <thead>
+          <tr>
+            <th scope="col">ID</th><th scope="col">Image</th><th scope="col">Title</th>
+            <th scope="col">Price</th><th scope="col">Category</th><th scope="col">Rating</th>
+            <th scope="col">Stock</th><th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: 5 }, (_, rowIndex) => (
+            <tr key={rowIndex}>
+              {Array.from({ length: 8 }, (_, cellIndex) => (
+                <td key={cellIndex}><span className="products__skeleton" /></td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function Products() {
   const dispatch = useDispatch();
   const { items: products, status, error } = useSelector(
     (state) => state.products,
   );
+  const deleteStatus = useSelector((state) => state.products.deleteStatus);
   const isLoading = status === "loading";
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -33,8 +83,8 @@ function Products() {
   const [deleteSuccess, setDeleteSuccess] = useState("");
 
   useEffect(() => {
-    // Redux owns this request, so it can safely finish if this page unmounts.
-    dispatch(fetchProducts({ force: true }));
+    // The thunk skips this request while loading or when products are already loaded.
+    dispatch(fetchProducts());
   }, [dispatch]);
 
   function handleSearchChange(event) {
@@ -63,7 +113,7 @@ function Products() {
 
   async function handleDeleteProduct(product) {
     const confirmed = window.confirm(
-      `Are you sure you want to delete "${product.name}"?`,
+      `Are you sure you want to delete "${product.title}"?`,
     );
 
     if (!confirmed) {
@@ -75,19 +125,13 @@ function Products() {
     setDeletingProductIds((currentIds) => [...currentIds, product.id]);
 
     try {
-      const response = await fetch(`${PRODUCTS_URL}/${product.id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error(`The server responded with status ${response.status}.`);
-      }
-
-      dispatch(removeProduct(product.id));
-      setDeleteSuccess(`${product.name} was deleted successfully.`);
+      await dispatch(deleteProduct(product.id)).unwrap();
+      setDeleteSuccess(
+        `${product.title || "Product"} was removed for this session. DummyJSON does not permanently delete products.`,
+      );
     } catch (requestError) {
       setDeleteError(
-        `Could not delete ${product.name}. ${requestError.message} Please try again.`,
+        `Could not delete ${product.title || "product"}. ${requestError} Please try again.`,
       );
     } finally {
       setDeletingProductIds((currentIds) =>
@@ -102,7 +146,9 @@ function Products() {
 
   const filteredProducts = products
     .filter((product) =>
-      product.name.toLowerCase().includes(searchTerm.trim().toLowerCase()),
+      (typeof product.title === "string" ? product.title : "")
+        .toLowerCase()
+        .includes(searchTerm.trim().toLowerCase()),
     )
     .filter(
       (product) => !selectedCategory || product.category === selectedCategory,
@@ -111,7 +157,7 @@ function Products() {
     .sort((first, second) => {
       switch (selectedSort) {
         case "name-desc":
-          return second.name.localeCompare(first.name, undefined, {
+          return (second.title || "").localeCompare(first.title || "", undefined, {
             sensitivity: "base",
           });
         case "price-asc":
@@ -120,7 +166,7 @@ function Products() {
           return Number(second.price) - Number(first.price);
         case "name-asc":
         default:
-          return first.name.localeCompare(second.name, undefined, {
+          return (first.title || "").localeCompare(second.title || "", undefined, {
             sensitivity: "base",
           });
       }
@@ -139,20 +185,15 @@ function Products() {
     filteredProducts.length,
   );
 
-  useEffect(() => {
-    if (totalPages === 0 && currentPage !== 1) {
-      setCurrentPage(1);
-    } else if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
-
   return (
     <section className="products" aria-labelledby="products-title">
       <header className="products__intro">
         <h2 className="products__title" id="products-title">Products</h2>
         <p className="products__description">
-          Manage and review the products in your store.
+          Browse and manage the DummyJSON product catalog.
+        </p>
+        <p className="products__api-note">
+          Demo API: add, edit, and delete changes appear here for this session but are not permanently saved by DummyJSON. Prices use INR formatting; no currency conversion is applied.
         </p>
       </header>
 
@@ -168,9 +209,10 @@ function Products() {
       )}
 
       {isLoading && (
-        <p className="products__message" role="status">
-          Loading products...
-        </p>
+        <div role="status" aria-live="polite">
+          <span className="products__loading-label">Loading products...</span>
+          <ProductSkeleton />
+        </div>
       )}
 
       {!isLoading && error && (
@@ -199,7 +241,7 @@ function Products() {
                 className="products__input"
                 id="product-search"
                 type="search"
-                placeholder="Search by product name"
+                placeholder="Search by product title"
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
@@ -253,9 +295,11 @@ function Products() {
                   <thead>
                     <tr>
                       <th scope="col">ID</th>
-                      <th scope="col">Product Name</th>
+                      <th scope="col">Image</th>
+                      <th scope="col">Title</th>
                       <th scope="col">Price</th>
                       <th scope="col">Category</th>
+                      <th scope="col">Rating</th>
                       <th scope="col">Stock</th>
                       <th scope="col">Actions</th>
                     </tr>
@@ -264,16 +308,24 @@ function Products() {
                     {pageProducts.map((product) => (
                       <tr key={product.id}>
                         <td>{product.id}</td>
-                        <td>{product.name}</td>
+                        <td>
+                          <ProductThumbnail product={product} />
+                        </td>
+                        <td>{product.title || "Untitled product"}</td>
                         <td>{priceFormatter.format(Number(product.price) || 0)}</td>
-                        <td>{product.category}</td>
-                        <td>{product.stock}</td>
+                        <td>{formatCategory(product.category)}</td>
+                        <td>
+                          {product.rating !== "" && Number.isFinite(Number(product.rating)) && product.rating != null
+                            ? `${Number(product.rating).toFixed(1)} / 5`
+                            : "Not rated"}
+                        </td>
+                        <td>{product.stock !== "" && Number.isFinite(Number(product.stock)) && product.stock != null ? product.stock : "\u2014"}</td>
                         <td>
                           <div className="products__row-actions">
                             <Link
                               className="products__action"
                               to={`/products/${product.id}/edit`}
-                              aria-label={`Edit ${product.name}`}
+                              aria-label={`Edit ${product.title || "product"}`}
                             >
                               Edit
                             </Link>
@@ -281,8 +333,11 @@ function Products() {
                               className="products__delete-button"
                               type="button"
                               onClick={() => handleDeleteProduct(product)}
-                              disabled={deletingProductIds.includes(product.id)}
-                              aria-label={`Delete ${product.name}`}
+                              disabled={
+                                deleteStatus === "loading" ||
+                                deletingProductIds.includes(product.id)
+                              }
+                              aria-label={`Delete ${product.title || "product"}`}
                             >
                               {deletingProductIds.includes(product.id)
                                 ? "Deleting..."

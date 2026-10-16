@@ -1,16 +1,18 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { addProduct } from "../features/products/productsSlice";
 import "./AddProduct.scss";
 
-const PRODUCTS_URL = "http://localhost:3000/products";
-
 function AddProduct() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "",
+    title: "",
     price: "",
     category: "",
     stock: "",
+    thumbnail: "",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -28,13 +30,13 @@ function AddProduct() {
     setError("");
     setSuccess("");
 
-    const name = formData.name.trim();
+    const title = formData.title.trim();
     const category = formData.category.trim();
     const price = Number(formData.price);
     const stock = Number(formData.stock);
 
-    if (!name) {
-      setError("Enter a product name.");
+    if (!title) {
+      setError("Enter a product title.");
       return;
     }
 
@@ -61,23 +63,18 @@ function AddProduct() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(PRODUCTS_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, price, category, stock }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`The server responded with status ${response.status}.`);
-      }
-
-      setSuccess("Product added successfully. Redirecting to Products...");
+      await dispatch(addProduct({
+        title,
+        price,
+        category,
+        stock,
+        ...(formData.thumbnail.trim() && { thumbnail: formData.thumbnail.trim() }),
+      })).unwrap();
+      setSuccess("Product added for this session. DummyJSON does not permanently save it. Redirecting to Products...");
       window.setTimeout(() => navigate("/products"), 900);
     } catch (requestError) {
       setError(
-        `The product could not be added. ${requestError.message} Please try again.`,
+        `The product could not be added. ${requestError} Please try again.`,
       );
       setIsSubmitting(false);
     }
@@ -108,17 +105,32 @@ function AddProduct() {
 
         <div className="add-product__field">
           <label className="add-product__label" htmlFor="product-name">
-            Product Name
+            Product Title
           </label>
           <input
             className="add-product__input"
             id="product-name"
-            name="name"
+            name="title"
             type="text"
-            value={formData.name}
+            value={formData.title}
             onChange={handleChange}
             autoComplete="off"
             required
+          />
+        </div>
+
+        <div className="add-product__field">
+          <label className="add-product__label" htmlFor="product-thumbnail">
+            Thumbnail URL (optional)
+          </label>
+          <input
+            className="add-product__input"
+            id="product-thumbnail"
+            name="thumbnail"
+            type="url"
+            value={formData.thumbnail}
+            onChange={handleChange}
+            autoComplete="url"
           />
         </div>
 

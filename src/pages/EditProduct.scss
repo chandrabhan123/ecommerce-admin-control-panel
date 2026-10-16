@@ -1,11 +1,11 @@
-$edit-product-surface: #ffffff;
-$edit-product-text: #1f2937;
-$edit-product-muted: #6b7280;
-$edit-product-border: #e5e7eb;
-$edit-product-accent: #2563eb;
-$edit-product-error: #b91c1c;
-$edit-product-success: #15803d;
-$edit-product-radius: 0.75rem;
+$edit-product-surface: var(--color-surface);
+$edit-product-text: var(--color-text);
+$edit-product-muted: var(--color-muted);
+$edit-product-border: var(--color-border);
+$edit-product-accent: var(--color-accent);
+$edit-product-error: var(--color-error);
+$edit-product-success: var(--color-success);
+$edit-product-radius: var(--radius-card);
 $edit-product-spacing: 1.5rem;
 
 .edit-product {
@@ -76,10 +76,14 @@ $edit-product-spacing: 1.5rem;
 
     &--error {
       color: $edit-product-error;
+      border-color: #f2ceca;
+      background-color: var(--color-error-soft);
     }
 
     &--success {
       color: $edit-product-success;
+      border-color: #b6e5cb;
+      background-color: var(--color-success-soft);
     }
   }
 
@@ -95,7 +99,7 @@ $edit-product-spacing: 1.5rem;
     cursor: pointer;
 
     &:hover:not(:disabled) {
-      background-color: #1d4ed8;
+      background-color: var(--color-accent-hover);
     }
 
     &:focus-visible {

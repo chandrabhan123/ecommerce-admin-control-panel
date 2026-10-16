@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { updateProduct } from "../features/products/productsSlice";
 import "./EditProduct.scss";
 
-const PRODUCTS_URL = "http://localhost:3000/products";
+const PRODUCTS_URL = "https://dummyjson.com/products";
 
 function EditProduct() {
+  const dispatch = useDispatch();
   const { productId } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "",
+    title: "",
     price: "",
     category: "",
     stock: "",
+    thumbnail: "",
   });
   const [loadedProductId, setLoadedProductId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,10 +42,11 @@ function EditProduct() {
 
         if (isCurrent) {
           setFormData({
-            name: product.name ?? "",
+            title: product.title ?? "",
             price: String(product.price ?? ""),
             category: product.category ?? "",
             stock: String(product.stock ?? ""),
+            thumbnail: product.thumbnail ?? "",
           });
           setError("");
         }
@@ -77,13 +82,13 @@ function EditProduct() {
     setError("");
     setSuccess("");
 
-    const name = formData.name.trim();
+    const title = formData.title.trim();
     const category = formData.category.trim();
     const price = Number(formData.price);
     const stock = Number(formData.stock);
 
-    if (!name) {
-      setError("Enter a product name.");
+    if (!title) {
+      setError("Enter a product title.");
       return;
     }
 
@@ -110,23 +115,21 @@ function EditProduct() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${PRODUCTS_URL}/${productId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, price, category, stock }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`The server responded with status ${response.status}.`);
-      }
-
-      setSuccess("Product updated successfully. Redirecting to Products...");
+      await dispatch(
+        updateProduct({
+          id: productId,
+          title,
+          price,
+          category,
+          stock,
+          thumbnail: formData.thumbnail.trim(),
+        }),
+      ).unwrap();
+      setSuccess("Product updated for this session. DummyJSON does not permanently save it. Redirecting to Products...");
       window.setTimeout(() => navigate("/products"), 900);
     } catch (requestError) {
       setError(
-        `The product could not be updated. ${requestError.message} Please try again.`,
+        `The product could not be updated. ${requestError} Please try again.`,
       );
       setIsSubmitting(false);
     }
@@ -165,17 +168,32 @@ function EditProduct() {
 
           <div className="edit-product__field">
             <label className="edit-product__label" htmlFor="edit-product-name">
-              Product Name
+              Product Title
             </label>
             <input
               className="edit-product__input"
               id="edit-product-name"
-              name="name"
+              name="title"
               type="text"
-              value={formData.name}
+              value={formData.title}
               onChange={handleChange}
               autoComplete="off"
               required
+            />
+          </div>
+
+          <div className="edit-product__field">
+            <label className="edit-product__label" htmlFor="edit-product-thumbnail">
+              Thumbnail URL (optional)
+            </label>
+            <input
+              className="edit-product__input"
+              id="edit-product-thumbnail"
+              name="thumbnail"
+              type="url"
+              value={formData.thumbnail}
+              onChange={handleChange}
+              autoComplete="url"
             />
           </div>
 
