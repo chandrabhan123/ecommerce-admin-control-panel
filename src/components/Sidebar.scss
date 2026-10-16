@@ -127,6 +127,7 @@
       min-height: 2.5rem;
       flex: 0 0 auto;
       padding: 0.55rem 0.75rem;
+      white-space: nowrap;
 
       &[aria-current="page"]::before {
         top: auto;

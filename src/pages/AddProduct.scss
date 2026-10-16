@@ -120,6 +120,8 @@ $add-product-spacing: 1.5rem;
   .add-product {
     gap: 1rem;
 
+    &__title { white-space: nowrap; }
+
     &__intro,
     &__form {
       padding: 1rem;
